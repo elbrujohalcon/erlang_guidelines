@@ -65,6 +65,7 @@ Table of Contents:
     * [Properly use logging levels](#properly-use-logging-levels)
     * [Prefer the https protocol when specifying dependency locations](#prefer-the-https-protocol-over-others-when-specifying-dependency-urls)
 * [Suggestions & Great Ideas](#suggestions--great-ideas)
+  * [Favor higher-order functions over manual use of recursion](#favor-higher-order-functions-over-manual-use-of-recursion)
   * [CamelCase over Under_Score](#camelcase-over-under_score)
   * [Prefer shorter (but still meaningful) variable names](#prefer-shorter-but-still-meaningful-variable-names)
   * [Comment levels](#comment-levels)
@@ -140,7 +141,7 @@ The 100 character limit also keeps lines short enough that you can comfortably w
 ***
 
 ##### Avoid deep nesting
-> Try not to nest more than 1 level deep.
+> Try not to nest more than 3 levels deep.
 
 *Examples*: [nesting](src/nesting.erl)
 
@@ -203,7 +204,7 @@ See also: [More, smaller functions over case expressions](#more-smaller-function
 
 *Examples*: [dyn_calls](src/dyn_calls.erl)
 
-*Reasoning*: Dynamic calls can't be checked by ``xref``, one of the most useful tools in the Erlang world.
+*Reasoning*: Dynamic calls can't be checked by [``xref``](http://erlang.org/doc/apps/tools/xref_chapter.html), one of the most useful tools in the Erlang world. ``xref`` is a cross reference checking/observing tool.
 
 ***
 ##### Group modules in subdirectories by functionality
@@ -320,7 +321,7 @@ Erlang syntax is horrible amirite? So you might as well make the best of it, rig
 
 *Examples*: [iolists](src/iolists.erl)
 
-*Reasoning*: Performance
+*Reasoning*: Performance and errors during conversion. [iolists](http://www.erlangpatterns.org/iolist.html) are just deeply nested lists of integers and binaries to represent IO data to avoid copying when concatenating strings or binaries.
 
 ### Macros
 
@@ -375,7 +376,7 @@ See [related blog post](https://medium.com/@erszcz/when-not-to-use-macros-in-erl
 
 *Examples*: [record_sharing](src/record_sharing.erl)
 
-*Reasoning*: Records are used for data structure definitions. Hiding those structures aids encapsulation and abstraction. If a record structure needs to be changed and it's definition is written in a .hrl file, the developer should find all the files where that .hrl and verify that his change hasn't broken anything. That's not needed if the record structure is internal to the module that manages it.
+*Reasoning*: Records are used for data structure definitions. Hiding those structures aids encapsulation and abstraction. If a record structure needs to be changed and its definition is written in a .hrl file, the developer should find all the files where that .hrl and verify that his change hasn't broken anything. That's not needed if the record structure is internal to the module that manages it.
 
 ***
 ##### Avoid records in specs
@@ -537,6 +538,16 @@ handling.
 ## Suggestions & Great Ideas
 
 Things that should be considered when writing code, but do not cause a PR rejection, or are too vague to consistently enforce.
+
+***
+##### Favor higher-order functions over manual use of recursion
+> Occasionally recursion is the best way to implement a function, but often a fold or a list comprehension will yield safer, more comprehensible code.
+
+*Examples*: [alternatives to recursion](src/recursion.erl)
+
+*Reasoning*: Manually writing a recursive function is error-prone, and mistakes can be costly. In the wrong circumstances, a buggy recursive function can miss its base case, spiral out of control, and take down an entire node. This tends to counteract one of the main benefits of Erlang, where an error in a single process does not normally cause the entire node to crash.
+
+Additionally, to an experienced Erlang developer, folds and list comprehensions are much easier to understand than complex recursive functions. Such contstructs behave predictably: they always perform an action for each element in a list. A recursive function may work similarly, but it often requires careful scrutiny to verify what path the control flow will actually take through the code in practice.
 
 ***
 ##### CamelCase over Under_Score

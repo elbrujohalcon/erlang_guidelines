@@ -1,5 +1,6 @@
 -module(case_catch).
 
+-export([bad/1, good/1]).
 
 bad(List) ->
   case catch hd(List) of
